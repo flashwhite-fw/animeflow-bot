@@ -2,7 +2,7 @@ import { readFileSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 
 const SITE = (process.env.SITE_URL || "https://animeflow.site").replace(/\/$/, "");
-const MIN_POP = Number(process.env.MIN_POPULARITY || 6000);
+const MIN_POP = Number(process.env.MIN_POPULARITY || 1500);
 const WINDOW_MIN = Number(process.env.WINDOW_MINUTES || 90);
 const STATE_FILE = process.env.STATE_FILE || "state.json";
 const DRY = process.env.DRY_RUN === "1";
