@@ -69,8 +69,9 @@ export function parseRss(xml) {
 export async function main() {
   if (!DRY && !/^https:\/\/(discord|discordapp)\.com\/api\/webhooks\//.test(HOOK)) throw new Error("DISCORD_WEBHOOK_URL manquant ou invalide");
   const now = Math.floor(Date.now() / 1000);
-  const first = loadState() === null;
   const st = loadState() || { ep: {}, news: {} };
+  st.seeded = st.seeded || {};
+  let total = 0;
   const keep = 14 * 86400;
   for (const k of ["ep", "news"]) for (const id in st[k]) if (now - st[k][id] > keep) delete st[k][id];
 
@@ -86,16 +87,18 @@ export async function main() {
     try {
       const r = await fetch(f.url, { headers: { "User-Agent": "AnimeFlowBot/1.0" } });
       if (!r.ok) { console.error("Flux", f.name, r.status); continue; }
-      const items = parseRss(await r.text()).slice(0, 10).reverse();
+      const items = parseRss(await r.text()).slice(0, 15).reverse();
+      const seed = !st.seeded[f.url];
       let posted = 0;
       for (const it of items) {
         if (st.news[it.link]) continue;
-        if (first) { st.news[it.link] = now; continue; }
-        if (posted >= 5) break;
+        if (seed) { st.news[it.link] = now; continue; }
+        if (posted >= 8 || total >= 25) break;
         const ok = await discord({ embeds: [{ title: "📰 " + it.title.slice(0, 250), url: it.link, description: it.desc || undefined,
           color: 0x7c3aed, image: it.img ? { url: it.img } : undefined, footer: { text: `${f.name} • Actus AnimeFlow` } }] });
-        if (ok) { st.news[it.link] = now; posted++; }
+        if (ok) { st.news[it.link] = now; posted++; total++; }
       }
+      if (items.length) st.seeded[f.url] = true;
     } catch (e) { console.error("Flux", f.name, e.message); }
   }
   saveState(st);
