@@ -7,15 +7,16 @@ const WINDOW_MIN = Number(process.env.WINDOW_MINUTES || 90);
 const STATE_FILE = process.env.STATE_FILE || "state.json";
 const DRY = process.env.DRY_RUN === "1";
 const HOOK = process.env.DISCORD_WEBHOOK_URL || "";
+const HOOK_EP = process.env.DISCORD_WEBHOOK_EPISODES || HOOK;
 const sleep = ms => new Promise(r => setTimeout(r, ms));
 
 const loadState = () => { try { return JSON.parse(readFileSync(STATE_FILE, "utf8")); } catch { return null; } };
 const saveState = s => writeFileSync(STATE_FILE, JSON.stringify(s));
 
-async function discord(payload) {
+async function discord(payload, hook = HOOK) {
   if (DRY) { console.log("[DRY] ->", JSON.stringify(payload).slice(0, 300)); return true; }
   for (let i = 0; i < 4; i++) {
-    const r = await fetch(HOOK, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
+    const r = await fetch(hook, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify(payload) });
     if (r.status === 429) { const j = await r.json().catch(() => ({})); await sleep(((j.retry_after || 2) + 0.5) * 1000); continue; }
     if (!r.ok) { console.error("Discord", r.status); return false; }
     await sleep(1200);
@@ -88,7 +89,7 @@ export async function main() {
   try {
     for (const s of await fetchAired(now)) {
       if (st.ep[s.id]) continue;
-      if (await discord(episodeEmbed(s))) st.ep[s.id] = now;
+      if (await discord(episodeEmbed(s), HOOK_EP)) st.ep[s.id] = now;
     }
   } catch (e) { console.error("Épisodes :", e.message); }
 
