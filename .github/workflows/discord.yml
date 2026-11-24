@@ -15,6 +15,14 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 20
+      - name: Test d'envoi (lancement manuel uniquement)
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+        run: |
+          code=$(curl -sS -o /dev/null -w "%{http_code}" -H "Content-Type: application/json" \
+            -d '{"content":"✅ Test AnimeFlow : le bot est bien connecté !"}' "$DISCORD_WEBHOOK_URL")
+          echo "Réponse Discord : $code (204 = OK)"
       - name: Restaurer la mémoire des messages déjà envoyés
         uses: actions/cache@v4
         with:
