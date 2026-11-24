@@ -94,7 +94,7 @@ export async function main() {
         if (st.news[it.link]) continue;
         if (seed) { st.news[it.link] = now; continue; }
         if (posted >= 8 || total >= 25) break;
-        const ok = await discord({ embeds: [{ title: "📰 " + it.title.slice(0, 250), url: it.link, description: it.desc || undefined,
+                const ok = await discord({ embeds: [{ title: "📰 " + it.title.slice(0, 250), url: SITE, description: (it.desc ? it.desc + "\n\n" : "") + `[📖 Lire l'article](${it.link})`,
           color: 0x7c3aed, image: it.img ? { url: it.img } : undefined, footer: { text: `${f.name} • Actus AnimeFlow` } }] });
         if (ok) { st.news[it.link] = now; posted++; total++; }
       }
