@@ -24,3 +24,4 @@ jobs:
       - run: node post.mjs
         env:
           DISCORD_WEBHOOK_URL: ${{ secrets.DISCORD_WEBHOOK_URL }}
+          DISCORD_WEBHOOK_EPISODES: ${{ secrets.DISCORD_WEBHOOK_EPISODES }}
