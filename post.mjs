@@ -66,6 +66,16 @@ export function parseRss(xml) {
     .filter(i => i.title && /^https?:\/\//.test(i.link));
 }
 
+async function ogImage(url) {
+  try {
+    const r = await fetch(url, { headers: { "User-Agent": "Mozilla/5.0 AnimeFlowBot" }, signal: AbortSignal.timeout(8000) });
+    if (!r.ok) return undefined;
+    const h = (await r.text()).slice(0, 200000);
+    const m = h.match(/<meta[^>]+property=["']og:image["'][^>]+content=["']([^"']+)["']/i) || h.match(/<meta[^>]+content=["']([^"']+)["'][^>]+property=["']og:image["']/i);
+    return m && /^https?:\/\//.test(m[1]) ? m[1].replace(/&amp;/g, "&") : undefined;
+  } catch { return undefined; }
+}
+
 export async function main() {
   if (!DRY && !/^https:\/\/(discord|discordapp)\.com\/api\/webhooks\//.test(HOOK)) throw new Error("DISCORD_WEBHOOK_URL manquant ou invalide");
   const now = Math.floor(Date.now() / 1000);
@@ -94,7 +104,8 @@ export async function main() {
         if (st.news[it.link]) continue;
         if (seed) { st.news[it.link] = now; continue; }
         if (posted >= 8 || total >= 25) break;
-                const ok = await discord({ embeds: [{ title: "📰 " + it.title.slice(0, 250), url: SITE, description: (it.desc ? it.desc + "\n\n" : "") + `[📖 Lire l'article](${it.link})`,
+        if (!it.img) it.img = await ogImage(it.link);
+        const ok = await discord({ embeds: [{ title: "📰 " + it.title.slice(0, 250), url: SITE, description: (it.desc ? it.desc + "\n\n" : "") + `[📖 Lire l'article](${it.link})`,
           color: 0x7c3aed, image: it.img ? { url: it.img } : undefined, footer: { text: `${f.name} • Actus AnimeFlow` } }] });
         if (ok) { st.news[it.link] = now; posted++; total++; }
       }
