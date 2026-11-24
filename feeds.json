@@ -1,3 +1,8 @@
 [
-  { "name": "Adala News", "url": "https://adala-news.fr/feed/" }
+  { "name": "Adala News", "url": "https://adala-news.fr/feed/" },
+  { "name": "Manga-News", "url": "https://www.manga-news.com/index.php/feed/news" },
+  { "name": "Manganime", "url": "https://www.manganime.fr/feed/" },
+  { "name": "AnimOtaku", "url": "https://animotaku.fr/feed/" },
+  { "name": "Otakuplayer", "url": "https://www.otakuplayer.fr/rss" },
+  { "name": "AnimeLand", "url": "https://animeland.fr/feed/" }
 ]
